@@ -1,0 +1,84 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(data.table) ## reading, processing, handling 
+library(VIM) ## vis and imputation
+library(validate) ## validation of rules 
+library(simputation) ### user-friendly imputation
+library(tidyverse)
+library(yaImpute) ## verify after the lecture
+```
+
+Read the data
+
+```{r}
+otodom <- fread("../data-raw/train-small1.csv")
+head(otodom)
+```
+
+We use function `aggr` to see the missing data within our data.frame
+
+WORKS ONLY IF MISSING DATA IS CODED NA
+
+If you have "NULL", "", -1, 0, -712i42
+
+```{r}
+miss_report <- aggr(x  = otodom)
+```
+
+```{r}
+#otodom[,.N, keyby = city_id]
+otodom %>% count(city_id)
+```
+
+Extract floor area and number of rooms
+
+```{r}
+otodom <- otodom %>%
+  mutate(floor_area = str_extract(params, "m<=>\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = str_extract(floor_area, "\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = as.numeric(floor_area),
+         rooms_num = str_extract(params, "rooms_num<=>\\d{1,}"),
+         rooms_num = str_extract(rooms_num, "\\d{1,}"),
+         rooms_num = as.numeric(rooms_num))
+
+aggr(otodom %>% select(floor_area, rooms_num))
+
+summary(otodom %>% select(floor_area, rooms_num))
+```
+
+- first: quality, remove erronous observations
+- then imputation
+
+Proceed with imputation of missing data in number of rooms with hot-deck method
+
+hotdeck - function from VIM package
+
+```{r}
+otodom_imp <- hotdeck(data = otodom,
+                      variable = "rooms_num",
+                      domain_var = c("region_id", "city_id", "category"))
+head(otodom_imp)
+```
+
+```{r}
+otodom_imp %>% count(rooms_num_imp)
+```
+
+```{r}
+otodom_imp %>%
+  count(rooms_num_imp, rooms_num) %>%
+  add_count(rooms_num_imp, wt = n, name = "total") %>%
+  mutate(p = n/ total) %>%
+  ggplot(data = ., aes(x = rooms_num, y = p, 
+                       color = rooms_num_imp, fill = rooms_num_imp)) +
+  geom_col(position = position_dodge())
+```
+
+Comment to this plot: we did it wrong! Mainly because of variables that we used, this is the problem. 
+
+Imputation will work only if you use highly correlated variables with the one that you impute.
+

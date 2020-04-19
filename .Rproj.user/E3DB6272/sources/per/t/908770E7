@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1585674483289.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2844665402",
+    "id" : "908770E7",
+    "lastKnownWriteTime" : 1586162019,
+    "last_content_update" : 1586162019962,
+    "path" : "~/git/dydaktyka/rema/rema-2020/notebooks/3-data-processing-project.Rmd",
+    "project_path" : "notebooks/3-data-processing-project.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "119,43",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

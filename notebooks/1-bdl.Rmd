@@ -1,0 +1,74 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(bdl)
+```
+
+Query BDL to get information about real estate
+
+```{r}
+query <- search_subjects("nieruch")
+query
+```
+
+What are the subject with category RYNEK Nieruchomosci
+
+```{r}
+rynek_sub <- get_subjects(parentId = "K48")
+rynek_sub
+```
+
+Let see variables within G597
+
+```{r}
+variabls <- get_subjects(parentId = "G597")
+variabls
+```
+
+Let see variables
+
+```{r}
+prices <- get_variables("P3794")
+prices
+```
+
+To get the actual numbers
+
++ get_data_by_variable
++ get_data_by_unit
+
+We will get data 1Q total at level of powiats
+
+```{r}
+df <- get_data_by_variable(varId = "634007", unitLevel = "5")
+
+subset(df, name == "Powiat m.Poznań")
+```
+
+How to query the BDL to get more variables
+
+- compare primary and secondary market
+
+```{r}
+market <- get_data_by_variable(
+  varId = 634012:634021, 
+  unitLevel = "5")
+head(market)
+```
+
+```{r}
+subset(market, 
+       name %in% c("Powiat m.Poznań", "Powiat poznański"))
+```
+
+```{r}
+market %>%
+  arrange(-val_634017) %>%
+  select(name, year, primary = val_634012, secondary = val_634017) %>%
+  filter(name == "Powiat m.Wrocław")
+```
+

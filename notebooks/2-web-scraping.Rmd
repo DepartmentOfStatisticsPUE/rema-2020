@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("rvest")
+install.packages("readr")
+install.packages("stringr")
+```
+
+```{r}
+library(rvest)
+library(readr)
+library(stringr)
+```
+
+First step is to get the main page with results
+
+```{r}
+otodom_page <- "https://www.otodom.pl/wynajem/pokoj/poznan/?search%5Bregion_id%5D=15&search%5Bsubregion_id%5D=462&search%5Bcity_id%5D=1"
+
+otodom_source <- read_html(otodom_page)
+
+otodom_source
+```
+
+We get the titles
+
+```{r}
+otodom_source %>%
+  html_nodes("span.offer-item-title") %>%
+  html_text() -> ads_titles
+
+otodom_source %>%
+  html_nodes("div.offer-item-details > header > h3 > a > span > span")
+```
+
+Extract prices
+
+```{r}
+otodom_source %>% 
+  html_nodes("li.offer-item-price") %>%
+  html_text() %>% 
+  str_replace_all(" ", "") %>% parse_number() -> ads_prices
+```
+
+Extract floor area 
+
+```{r}
+otodom_source %>% 
+  html_nodes("strong.visible-xs-block") %>%
+  html_text() %>%
+  str_replace("m²", "") %>%
+  str_replace(",", ".") %>%
+  parse_number() -> ads_floor_area
+```
+
+Extract links
+
+```{r}
+otodom_source %>%
+  html_nodes("div.offer-item-details") %>%
+  html_nodes("header") %>%
+  html_nodes("h3") %>%
+  html_nodes("a")
+
+otodom_source %>%
+  html_nodes("div.offer-item-details > header > h3 > a") %>%
+  html_attr("href") -> ads_links
+
+ads_links
+```
+
+
+```{r}
+hist(ads_prices)
+```
+
+```{r}
+plot(ads_floor_area, ads_prices)
+cor(ads_floor_area, ads_prices, use = "complete.obs")
+```
+
+```{r}
+data.frame(ads_titles, ads_prices, ads_floor_area, ads_links)
+```
+

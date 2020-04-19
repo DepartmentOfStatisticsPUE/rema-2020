@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1585672668800.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3059880400",
+    "id" : "8DF986AD",
+    "lastKnownWriteTime" : 1586260765,
+    "last_content_update" : 1586260765726,
+    "path" : "~/git/dydaktyka/rema/rema-2020/readme.md",
+    "project_path" : "readme.md",
+    "properties" : {
+        "cursorPosition" : "7,52",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

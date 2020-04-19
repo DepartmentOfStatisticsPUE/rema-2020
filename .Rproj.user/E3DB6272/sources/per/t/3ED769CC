@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1586158678134.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2367839149",
+    "id" : "3ED769CC",
+    "lastKnownWriteTime" : 1586164660,
+    "last_content_update" : 1586164660253,
+    "path" : "~/git/dydaktyka/rema/rema-2020/notebooks/4-imputation.Rmd",
+    "project_path" : "notebooks/4-imputation.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "74,26",
+        "scrollLine" : "45",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

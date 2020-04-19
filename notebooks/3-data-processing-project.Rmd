@@ -1,0 +1,138 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(lubridate)
+```
+
+Read the data in
+
+```{r}
+cities <- fread('../data-raw/cities.csv')
+head(cities)
+```
+
+```{r}
+dim(cities)
+```
+
+Data about districts (part of cities)
+
+```{r}
+districts <- fread('../data-raw/districts.csv')
+dim(districts)
+head(districts)
+```
+
+Read the main data set that we can use for modelling purposes
+
+```{r}
+otodom <- fread("../data-raw/train-small1.csv")
+str(otodom,1)
+```
+
+Check the summary of the data
+
+```{r}
+summary(otodom)
+```
+
+```{r}
+head(otodom)
+```
+
+## outline
+
+1. change created_at_first to date - time format and extract day and hour -- lubridate package
+2. extracting relevant information from params variable -- stringr package (part of tidyverse), stringi (by Marek Gągolewski)
+
+
+### working with dates
+
+```{r}
+otodom <- otodom %>% 
+  mutate(created_at_first = ymd_hms(created_at_first),
+         yq = quarter(created_at_first, with_year = T))
+
+head(otodom)
+```
+
+See how many observations we have by quarters and by category
+
+```{r}
+otodom %>% 
+  count(yq, category, is_business) %>%
+  ggplot(data = ., aes(x = yq, y = n, color = category, group = category)) +
+  geom_line() + 
+  facet_wrap(~is_business)
+```
+
+Add information about the year and month
+
+```{r}
+otodom <- otodom %>% 
+  mutate(year = year(created_at_first),
+         month = month(created_at_first),
+         year_month = round_date(created_at_first, unit = "month", week_start = 1))
+
+otodom %>%
+  select(id, created_at_first, year, month, year_month)
+```
+
+### working with strings
+
+```{r}
+head(otodom)
+```
+
+Locate the longest string in params
+
+```{r}
+longest_string <- which.max(str_length(otodom$params))
+dummy_string <- otodom$params[longest_string]
+dummy_string
+```
+
+```{r}
+str_extract(string = dummy_string, pattern = "<br>[a-z_]+<=>")
+
+str_extract_all(string = dummy_string, pattern = "<br>[a-z_]+<=>")
+```
+
+```{r}
+str_split(string = dummy_string, pattern = "<br>")
+```
+
+Extract information about floor area and numer of rooms
+
+```{r}
+otodom %>%
+  select(id, price, params) %>%
+  mutate(floor_area = str_extract(params, "m<=>\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = str_extract(floor_area, "\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = as.numeric(floor_area),
+         rooms_num = str_extract(params, "rooms_num<=>\\d{1,}"),
+         rooms_num = str_extract(rooms_num, "\\d{1,}"),
+         rooms_num = as.numeric(rooms_num)) %>%
+  select(id, floor_area, rooms_num, price, params) -> otodom_small
+
+otodom_small
+```
+
+```{r}
+boxplot(log(price) ~ rooms_num, data = otodom_small)
+```
+
+```{r}
+plot(log(otodom_small$floor_area), log(otodom_small$price))
+```
+
+```{r}
+cor(log(otodom_small$floor_area), log(otodom_small$price), m = "s")
+cor(log(otodom_small$floor_area), log(otodom_small$price), m = "p")
+```
+
