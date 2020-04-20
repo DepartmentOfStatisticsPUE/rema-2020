@@ -1,0 +1,106 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("FNN")
+library(FNN)
+#library(fastLink)
+library(data.table)
+library(lubridate)
+```
+
+We read the train file
+
+```{r}
+train <- fread("~/git/zbiory/otodom/train-small3.csv", 
+               col.names = c("id", "created_at_first", "category",
+                             "is_business", "district_id", "city_id", "region_id", 
+                             "params", "title", "price"))
+head(train)
+```
+
+- model.matrix or Matrix::sparse.model.matrix
+
+```{r}
+X <- model.matrix(~ - 1 + category + is_business, data = train)
+head(X)
+```
+
+```{r}
+train$city_id <- as.factor(train$city_id)
+train$region_id <- as.factor(train$region_id)
+train$created_at_first <- ymd_hms(train$created_at_first)
+train$year_month <- round_date(train$created_at_first, unit  = "month")
+train$primary <- grepl("primary", train$params)
+train
+```
+
+```{r}
+X_train <- model.matrix(~ -1 + category + is_business + city_id + region_id + primary, data = train)
+dim(X_train)
+```
+
+```{r}
+result <- FNN::get.knnx(data = X_train[1:1000,], query = X_train[10001:10002,], k = 1)
+result
+```
+
+Regression
+
+```{r}
+reg <- knn.reg(train = X_train[1:1000,], y = train$price[1:1000], k = 3)
+reg
+```
+
+```{r}
+plot(train$price[1:1000], reg$pred)
+```
+
+
+
+We read the test file 
+
+```{r}
+test <- fread("~/git/zbiory/otodom/test-small.csv")
+head(test)
+```
+
+```{r}
+test$city_id <- as.factor(test$city_id)
+test$region_id <- as.factor(test$region_id)
+test$created_at_first <- ymd_hms(test$created_at_first)
+test$year_month <- round_date(test$created_at_first, unit  = "month")
+test$primary <- grepl("primary", test$params)
+
+X_test <- model.matrix(~ -1 + category + is_business + 
+                          city_id + region_id + primary, data = test)
+
+
+dim(X_test)
+dim(X_train)
+
+columns_for_model <- intersect(colnames(X_test), colnames(X_train))
+NROW(columns_for_model)
+```
+
+```{r}
+reg <- knn.reg(train = X_train[1:5000,columns_for_model], 
+               #test = X_test[1:1000,columns_for_model],
+               y = train$price[1:5000], k = 5)
+
+reg
+```
+
+Let's do the standard OLS
+
+
+```{r}
+model1 <- lm.fit(x = X_train[1:5000,columns_for_model], y = train$price[1:5000])
+
+sqrt(mean( (train$price[1:5000]-model1$fitted.values)^2))
+sqrt(mean( (train$price[1:5000]-reg$pred)^2))
+
+```
+
