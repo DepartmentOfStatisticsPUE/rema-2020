@@ -1751,33 +1751,13 @@ summary {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShGTk4pXG4jbGlicmFyeShmYXN0TGluaylcbmxpYnJhcnkoZGF0YS50YWJsZSlcblxuYGBgIn0= -->
-<pre class="r"><code>library(FNN)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaW5zdGFsbC5wYWNrYWdlcyhcIkZOTlwiKVxubGlicmFyeShGTk4pXG4jbGlicmFyeShmYXN0TGluaylcbmxpYnJhcnkoZGF0YS50YWJsZSlcbmxpYnJhcnkobHVicmlkYXRlKVxuYGBgIn0= -->
+<pre class="r"><code>install.packages(&quot;FNN&quot;)
+library(FNN)
 #library(fastLink)
 library(data.table)
-</code></pre>
+library(lubridate)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2Qgb3ZlcndyaXR0ZW4gYnkgJ2RhdGEudGFibGUnOlxuICBtZXRob2QgICAgICAgICAgIGZyb21cbiAgcHJpbnQuZGF0YS50YWJsZSAgICAgXG5kYXRhLnRhYmxlIDEuMTIuOCB1c2luZyA0IHRocmVhZHMgKHNlZSA/Z2V0RFR0aHJlYWRzKS4gIExhdGVzdCBuZXdzOiByLWRhdGF0YWJsZS5jb21cbiJ9 -->
-<pre><code>Registered S3 method overwritten by &#39;data.table&#39;:
-  method           from
-  print.data.table     
-data.table 1.12.8 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShsdWJyaWRhdGUpXG5gYGAifQ== -->
-<pre class="r"><code>library(lubridate)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDigJhsdWJyaWRhdGXigJkgd2FzIGJ1aWx0IHVuZGVyIFIgdmVyc2lvbiAzLjYuMlxuQXR0YWNoaW5nIHBhY2thZ2U6IOKAmGx1YnJpZGF0ZeKAmVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6ZGF0YS50YWJsZeKAmTpcblxuICAgIGhvdXIsIGlzb3dlZWssIG1kYXksIG1pbnV0ZSwgbW9udGgsIHF1YXJ0ZXIsIHNlY29uZCwgd2RheSwgd2VlaywgeWRheSwgeWVhclxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6YmFzZeKAmTpcblxuICAgIGRhdGUsIGludGVyc2VjdCwgc2V0ZGlmZiwgdW5pb25cbiJ9 -->
-<pre><code>package ‘lubridate’ was built under R version 3.6.2
-Attaching package: ‘lubridate’
-
-The following objects are masked from ‘package:data.table’:
-
-    hour, isoweek, mday, minute, month, quarter, second, wday, week, yday, year
-
-The following objects are masked from ‘package:base’:
-
-    date, intersect, setdiff, union</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>We read the train file</p>

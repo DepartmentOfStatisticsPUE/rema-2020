@@ -1,0 +1,111 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("robust")
+library(data.table)
+library(tidyverse)
+library(lubridate)
+library(lmtest)  ## 
+library(MASS)
+library(robust)
+```
+
+```{r}
+train <- fread("~/git/zbiory/otodom/train-small3.csv", 
+               col.names = c("id", "created_at_first", "category",
+                             "is_business", "district_id", "city_id", "region_id", 
+                             "params", "title", "price")) %>%
+  mutate(floor_area = str_extract(params, "m<=>\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = str_extract(floor_area, "\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = as.numeric(floor_area),
+         rooms_num = str_extract(params, "rooms_num<=>\\d{1,}"),
+         rooms_num = str_extract(rooms_num, "\\d{1,}"),
+         rooms_num = as.numeric(rooms_num),created_at_first = ymd_hms(created_at_first),
+         yq = quarter(created_at_first, with_year = T))
+
+head(train)
+```
+
+```{r}
+plot(train$floor_area, train$price)
+```
+
+```{r}
+train <- train %>%
+  filter(price > quantile(price, 0.01), price < quantile(price, 0.99)) %>%
+  filter(floor_area > quantile(floor_area, 0.01), floor_area < quantile(floor_area, 0.99))
+```
+
+```{r}
+plot(train$floor_area, train$price)
+```
+
+Let's build a simple linear model with floor_area, num_rooms, category + is_business
+
+```{r}
+m1 <- lm(formula = price ~ floor_area + rooms_num + category + is_business, 
+         data = train)
+
+summary(m1)
+```
+
+Plot1 
+
+$$
+(y_i - \hat{y_i}, \hat{y}_i)
+$$
+
+```{r}
+plot(m1)
+```
+
+
+Now, we will calculate robust model with MASS::rlm
+
+```{r}
+m2 <- MASS::rlm(formula = price ~ floor_area + rooms_num + category + is_business, 
+                data = train, y.ret = TRUE)
+summary(m1)
+summary(m2)
+```
+
+```{r}
+summary(m2$w)
+sum(m2$w < 1) / NROW(m2$w)
+```
+
+```{r}
+plot(m2$y, m2$w, xlab = "Price", ylab = "Huber weight", 
+     main = "Distribution of prices and Huber weights")
+
+plot(m2$x[,"floor_area"], m2$w, xlab = "Floor area", ylab = "Huber weight", 
+     main = "Distribution of floor area and Huber weights")
+```
+
+```{r}
+m3 <- MASS::rlm(formula = price ~ floor_area + rooms_num + category + is_business, 
+                data = train, y.ret = TRUE, psi = psi.bisquare)
+summary(m3)
+```
+
+
+```{r}
+hist(m3$w, breaks = "fd")
+sum(m3$w) / NROW(m3$w)
+```
+
+```{r}
+plot(m3$y, m3$w, xlab = "Price", ylab = "Huber weight", 
+     main = "Distribution of prices and Huber weights")
+
+plot(m3$x[,"floor_area"], m3$w, xlab = "Floor area", ylab = "Huber weight", 
+     main = "Distribution of floor area and Huber weights")
+```
+
+```{r}
+plot(m2$w, m3$w, xlab = "Huber weights", ylab = "Bisquare weights")
+```
+
