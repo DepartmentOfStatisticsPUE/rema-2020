@@ -47,7 +47,16 @@ If we assume the linear conditional quantile function $Q_Y(\tau|X=x) = \boldsymb
 $$
 \hat{\beta}(\tau) = \operatorname{arg\,min}\limits_{\boldsymbol{\beta} in \boldsymbol{R}^p} \sum_{i=1}^n\rho_{\tau}(y_i- \boldsymbol{x}'_i\boldsymbol{\beta}).
 $$
+## Quantile regression in R
+
+The main package for quantile regression in R is `quantreg` which implements the following models
+
+1. `quantreg::rq` -- linear quantile regression
+2. `quantreg::nlrq` -- nonlinear quantile regression
+
 
 ## Example on real estate market
+
+
 
 
