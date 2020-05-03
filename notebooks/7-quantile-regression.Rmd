@@ -1,0 +1,53 @@
+---
+title: "Quantile regression - introduction"
+author: "Maciej Beręsewicz"
+output: html_notebook
+---
+
+# Quantile regression
+
+## Literature
+
+## Introduction
+
+In quantile regression we are interested in modelling the $\tau$ quantile of target $Y$ variable instead of mean.
+
+More formally, any real valued random variable  $Y$, may be characterized by its distribution function
+
+
+$$
+F(y) = Prob(Y \leq y)
+$$
+
+where for any $0 < \tau < 1$,
+
+$$
+Q(\tau) = \inf\{y : F(y) \geq \tau \}
+$$
+
+is called the $\tau$-th quantile of $Y$. The median, $Q(1/2)$, plays the central role. Like the distribution function, the quantile function provides a complete charicterization of the random variable $Y$.
+
+The quantiles may be formulated as the solution to a simple optimization problem. For any $0 < \tau < 1$, define a picewise linear "check function"
+
+$$
+\rho_\tau(u) = u (\tau - I( u < 0))
+$$
+
+Minimizing the expectation of $\rho_\tau(Y-\xi)$ with respect to $\xi$ yelds solutions, $\hat{\xi}(\tau)$, the smallest of which is $Q(\tau)$ defined above.
+
+
+The same analogue of $Q(\tau)$, based on a random sample, $\{y_1, y_2, ..., y_n \}$ of $Y$'s is called the $\tau$-th sample quantile, and may be found by solving
+
+$$
+\min\limits_{\xi in \boldsymbol{R}} \sum_{i=1}^n \rho_\tau(y_i - \xi).
+$$
+
+If we assume the linear conditional quantile function $Q_Y(\tau|X=x) = \boldsymbol{x}'_i\boldsymbol{\beta}$, we get
+
+$$
+\hat{\beta}(\tau) = \operatorname{arg\,min}\limits_{\boldsymbol{\beta} in \boldsymbol{R}^p} \sum_{i=1}^n\rho_{\tau}(y_i- \boldsymbol{x}'_i\boldsymbol{\beta}).
+$$
+
+## Example on real estate market
+
+
