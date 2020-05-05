@@ -4,6 +4,35 @@ author: "Maciej Beręsewicz"
 output: html_notebook
 ---
 
+# Packages
+
+```{r}
+library(quantreg) ## install.packages("quantreg")
+library(data.table)
+library(tidyverse)
+library(lubridate)
+```
+
+
+# Data 
+
+```{r}
+train <- fread("~/git/zbiory/otodom/train-small3.csv", 
+               col.names = c("id", "created_at_first", "category",
+                             "is_business", "district_id", "city_id", "region_id", 
+                             "params", "title", "price")) %>%
+  mutate(floor_area = str_extract(params, "m<=>\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = str_extract(floor_area, "\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = as.numeric(floor_area),
+         rooms_num = str_extract(params, "rooms_num<=>\\d{1,}"),
+         rooms_num = str_extract(rooms_num, "\\d{1,}"),
+         rooms_num = as.numeric(rooms_num),created_at_first = ymd_hms(created_at_first),
+         yq = quarter(created_at_first, with_year = T))
+
+head(train)
+
+```
+
 # Quantile regression
 
 ## Literature
@@ -58,5 +87,64 @@ The main package for quantile regression in R is `quantreg` which implements the
 ## Example on real estate market
 
 
+## linear regression
 
+```{r}
+head(train)
+train <- train %>% mutate(region_id = as.factor(region_id),
+                          city_id = as.factor(city_id))
+```
+
+
+```{r}
+train <- train %>% filter(price > quantile(price,0.03), price < quantile(price,0.97))
+
+model1 <- lm(formula = price ~ floor_area + rooms_num + is_business + category + region_id, data = train)
+summary(model1)
+round(coef(model1),4)
+```
+
+## quantile regression
+
+We will start with the median
+
+```{r}
+model2 <- rq(formula = price ~ floor_area + rooms_num + is_business + category + region_id, tau = 0.5, data = train)
+summary(model2)
+```
+
+```{r}
+mean(sqrt(model1$residuals^2)) ## linear model
+mean(sqrt(model2$residuals^2)) ## quantile model
+```
+
+Quantile regression for other percentiles
+
+```{r}
+model3 <- rq(formula = price ~ floor_area + rooms_num + is_business + category, tau = c(0.25, 0.5, 0.75), data = train)
+summary(model3)
+```
+
+```{r}
+plot(model3)
+```
+
+```{r}
+model4 <- rq(formula = price ~ floor_area + rooms_num + is_business + category + region_id, 
+             tau = seq(0.05,0.95,0.05), 
+             data = train)
+plot(model4)
+```
+
+Extract coefficients
+
+```{r}
+model4_result <- model4 %>% summary()
+
+mode(model4_result)
+length(model4_result)
+
+coef(model4_result[[16]])
+
+```
 
