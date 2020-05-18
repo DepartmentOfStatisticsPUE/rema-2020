@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("relaimpo")
+install.packages("DALEX")
+install.packages("breakDown")
+library(relaimpo)
+library(data.table)
+library(tidyverse)
+library(lubridate)
+library(speedglm)
+library(DALEX)
+library(breakDown)
+```
+
+```{r}
+train <- fread("~/git/zbiory/otodom/train-small3.csv", 
+               col.names = c("id", "created_at_first", "category",
+                             "is_business", "district_id", "city_id", "region_id", 
+                             "params", "title", "price")) %>%
+  mutate(floor_area = str_extract(params, "m<=>\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = str_extract(floor_area, "\\d{1,}(\\.\\d{1,2})?"),
+         floor_area = as.numeric(floor_area),
+         rooms_num = str_extract(params, "rooms_num<=>\\d{1,}"),
+         rooms_num = str_extract(rooms_num, "\\d{1,}"),
+         rooms_num = as.numeric(rooms_num),created_at_first = ymd_hms(created_at_first),
+         yq = quarter(created_at_first, with_year = T)) %>%
+  filter(price > quantile(price, 0.01), price < quantile(price, 0.99)) %>%
+  filter(floor_area > quantile(floor_area, 0.01), 
+         floor_area < quantile(floor_area, 0.99))
+
+head(train)
+```
+
+
+```{r}
+m1 <- lm(formula = price ~ category + is_business + factor(region_id) + 
+           floor_area + rooms_num + factor(yq),
+         data = train)
+m2 <- lm(formula = log(price) ~ category + is_business  + factor(region_id) + 
+           floor_area + rooms_num + factor(yq),
+         data = train)
+summary(m2)
+```
+
+1. method first
+
++ log(price) ~ category 
++ log(price) ~ is_business
+
+```{r}
+explain_m2 <- calc.relimp(m2, type = "first", rela = TRUE)
+explain_m2
+```
+
+2. Method last
+
+```{r}
+explain_m2_last <- calc.relimp(m2, type = "last", rela = TRUE)
+explain_m2_last
+```
+
+Other methods 
+
+```{r}
+calc.relimp(m2,  type = c("first", "last", "betasq"), rela = TRUE)
+```
+
+method lmg
+
++ y ~ x1 + x2 + x3
+
++ y ~ x1
++ y ~ x2
++ y ~ x3
++ y ~ x1 + x2
++ y ~ x1 + x3
++ y ~ x2 + x3
++ y ~ x1 + x2 + x3
+
+
+```{r}
+explain_m2_lmg <- calc.relimp(m2,  type = c("first", "last", "lmg"), rela = TRUE)
+explain_m2_lmg
+```
+
+
+I do not recommend to use: first and betasq methods
+
+Using DALEX
+
+1. prepare data
+2. create model(s)
+3. create explainer (DALEX::explain)
+4. relative_importance
+
+```{r}
+## dataset
+train_model <- train %>% select(price, category, is_business, region_id,
+                                floor_area, rooms_num, yq) %>%
+  mutate(region_id = factor(region_id), yq = factor(yq),
+         price_log = log(price)) %>%
+  na.omit()
+
+## model
+m2 <- lm(formula = price_log ~ category + is_business  + region_id + 
+           floor_area + rooms_num + yq,
+         data = train_model)
+
+## explainer
+m2_explain <- DALEX::explain(model = m2,
+                             data = train_model,
+                             y = train_model$price_log, 
+                             label = "model-lm")
+```
+
+Variable importance
+
+```{r}
+DALEX::variable_importance(explainer = m2_explain)
+```
+
+```{r}
+plot(breakDown::break_down(m2_explain, new_observation = train_model[1000,]))
+```
+
