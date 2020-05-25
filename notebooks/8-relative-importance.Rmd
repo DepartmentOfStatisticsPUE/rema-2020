@@ -32,7 +32,6 @@ train <- fread("~/git/zbiory/otodom/train-small3.csv",
   filter(floor_area > quantile(floor_area, 0.01), 
          floor_area < quantile(floor_area, 0.99))
 
-head(train)
 ```
 
 
